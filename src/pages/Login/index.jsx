@@ -52,6 +52,7 @@ const Login = () => {
           },
         });
         localStorage.setItem("user", JSON.stringify({ logged: true }));
+        history.push("/reserva");
       }, 2000);
       console.log(value);
     },

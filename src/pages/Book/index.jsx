@@ -44,8 +44,7 @@ const Book = () => {
     validationSchema,
     onSubmit: (value) => {
       console.log("FORMIK", value);
-      findBooksByRangeDate(value).then((data) => {
-        let dataRooms = data;
+      findBooksByRangeDate(value).then((data) => {        
         console.log(data);
       });
     },
@@ -211,6 +210,7 @@ const Book = () => {
 
   useEffect(() => {
     listRooms();
+    setFilterTable(null)
   }, []);
 
   return (
