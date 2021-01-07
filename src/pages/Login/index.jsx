@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
 import { Form, Button, Input, Divider } from "antd";
 import {
@@ -12,11 +12,16 @@ import * as Yup from "yup";
 import "./Login.css";
 
 import LogoHarrison from "../../img/logo-harrison.min.png";
+import { useHistory } from "react-router-dom";
+import { AuthContext } from "../../auth/AuthContext";
+import { types } from "../../types/types";
 
 const imgHotel =
   "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=387&q=80";
 
 const Login = () => {
+  const history = useHistory();
+  const { dispatch } = useContext(AuthContext);
   const [loadSubmit, setLoadSubmit] = useState(false);
 
   const validationSchema = Yup.object().shape({
@@ -40,6 +45,13 @@ const Login = () => {
       setLoadSubmit(true);
       setTimeout(() => {
         setLoadSubmit(false);
+        dispatch({
+          type: types.login,
+          payload: {
+            name: "Aimar Andony",
+          },
+        });
+        localStorage.setItem("user", JSON.stringify({ logged: true }));
       }, 2000);
       console.log(value);
     },

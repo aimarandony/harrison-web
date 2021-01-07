@@ -18,3 +18,8 @@ body {
   font-size: 13px;
   text-align: center;
 }
+
+.ant-page-header.site-page-header{
+  padding: 0;
+  margin-bottom: 15px;
+}

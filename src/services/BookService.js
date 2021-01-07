@@ -1,4 +1,3 @@
-  
 import clienteAxios from "../config/AxiosConfig";
 
 const getBooks = async () => {
@@ -6,4 +5,9 @@ const getBooks = async () => {
   return resp.data;
 };
 
-export { getBooks };
+const findBooksByRangeDate = async (data) => {
+  const resp = await clienteAxios.post("/reservas/find-dateTime", data);
+  return resp.data;
+};
+
+export { getBooks, findBooksByRangeDate };

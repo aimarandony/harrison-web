@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
-import { Layout, Menu, Breadcrumb, Dropdown, Button } from "antd";
+import { Layout, Menu, Dropdown, Button } from "antd";
 import {
   FileOutlined,
   UserOutlined,
@@ -13,22 +13,35 @@ import {
   KeyOutlined,
   DownOutlined,
   LogoutOutlined,
-  HomeOutlined,
 } from "@ant-design/icons";
 
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 
 import "./Layout.css";
+import { AuthContext } from "../../auth/AuthContext";
+import { types } from "../../types/types";
 
 const { Header, Content, Sider } = Layout;
 const { SubMenu } = Menu;
 
 const LayoutCustom = ({ children }) => {
+  const history = useHistory();
+
+  const { dispatch } = useContext(AuthContext);
+
   const [collapsed, setCollapsed] = useState(false);
+
+  const logout = () => {
+    dispatch({
+      type: types.logout,
+    });
+    localStorage.setItem("user", JSON.stringify({ logged: false }));
+    history.push("/");
+  };
 
   const menu = (
     <Menu>
-      <Menu.Item key="1" icon={<LogoutOutlined />}>
+      <Menu.Item key="1" icon={<LogoutOutlined />} onClick={logout}>
         Cerrar Sesión
       </Menu.Item>
     </Menu>
@@ -57,7 +70,11 @@ const LayoutCustom = ({ children }) => {
             Check Out
           </Menu.Item>
           <SubMenu key="sub1" icon={<ShoppingCartOutlined />} title="Venta">
-            <Menu.Item key="4">Productos</Menu.Item>
+            <Menu.Item key="4">
+              <NavLink to="/productos" activeClassName="active">
+                Productos
+              </NavLink>
+            </Menu.Item>
             <Menu.Item key="5">Vender</Menu.Item>
           </SubMenu>
           <SubMenu key="sub2" icon={<InboxOutlined />} title="Caja">
@@ -94,13 +111,7 @@ const LayoutCustom = ({ children }) => {
             </Button>
           </Dropdown>
         </Header>
-        <Content style={{ margin: "0 16px" }}>
-          <Breadcrumb style={{ margin: "16px 0" }}>
-            <Breadcrumb.Item>
-              <HomeOutlined />
-            </Breadcrumb.Item>
-            <Breadcrumb.Item>Reserva</Breadcrumb.Item>
-          </Breadcrumb>
+        <Content style={{ margin: "16px" }}>
           <div
             className="site-layout-background"
             style={{ padding: 24, minHeight: 360 }}
