@@ -10,17 +10,21 @@ import {
   Select,
   Card,
   Tooltip,
+  Modal,
+  Descriptions,
 } from "antd";
 import { ClearOutlined, EyeOutlined } from "@ant-design/icons";
 
-import { getRooms } from "../../services/RoomService";
+import { getRooms, getRoomById } from "../../services/RoomService";
 
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { findBooksByRangeDate } from "../../services/BookService";
+import { getRoomKinds } from "../../services/RoomKindService";
+
+import "./Book.css";
 
 const { RangePicker } = DatePicker;
-const { Option } = Select;
 
 const styleFormItem = {
   display: "flex",
@@ -32,44 +36,80 @@ const Book = () => {
   const [loading, setLoading] = useState(true);
   const [dataSource, setDataSource] = useState([]);
   const [filterTable, setFilterTable] = useState(null);
+  const [roomKinds, setRoomKinds] = useState([]);
+  const [room, setRoom] = useState({});
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [loadFilter, setLoadFilter] = useState(false);
 
-  const validationSchema = Yup.object().shape({});
+  const validationSchema = Yup.object().shape({
+    dateRange: Yup.array()
+      .nullable()
+      .required("Fecha de Inicio y Fin requerido."),
+  });
 
   const formik = useFormik({
     initialValues: {
       start: "",
       finish: "",
       dateRange: null,
+      roomKind: "",
+      numBeds: null,
     },
     validationSchema,
     onSubmit: (value) => {
+      setLoadFilter(true);
       console.log("FORMIK", value);
-      findBooksByRangeDate(value).then((data) => {        
-        console.log(data);
+      findBooksByRangeDate(value).then((data) => {
+        if (formik.values.roomKind === "") {
+          setFilterTable(formatDataRooms(data));
+        } else {
+          filterRooms(data);
+        }
+        setLoadFilter(false);
+        console.log("RESP FORMIK", data);
       });
     },
   });
 
+  const formatDataRooms = (data) => {
+    data.forEach((data, idx) => {
+      data.key = idx + 1;
+      data.nivel = data.nivel.nombre;
+      data.nroCamas = data.tipoHabitacion.nroCamas;
+      data.precio = data.tipoHabitacion.precio;
+      data.tipo = data.tipoHabitacion.nombre;
+    });
+    return data;
+  };
+
   const listRooms = () => {
     getRooms().then((resp) => {
-      resp.forEach((data) => {
-        data.key = data.id;
-        data.nivel = data.nivel.nombre;
-        data.nroCamas = data.tipoHabitacion.nroCamas;
-        data.precio = data.tipoHabitacion.precio;
-        data.tipo = data.tipoHabitacion.nombre;
-      });
-      setDataSource(resp);
-      console.log(resp);
+      setDataSource(formatDataRooms(resp));
+      console.log(dataSource);
       setLoading(false);
     });
+  };
+
+  const getRoomInfo = (state, id) => {
+    if (state) {
+      getRoomById(id).then((resp) => {
+        resp.nombreNivel = resp.nivel.nombre;
+        resp.nombreTipo = resp.tipoHabitacion.nombre;
+        resp.nroCamas = resp.tipoHabitacion.nroCamas;
+        resp.precio = resp.tipoHabitacion.precio;
+        setRoom(resp);
+        setModalVisible(state);
+      });
+    } else {
+      setModalVisible(state);
+    }
   };
 
   const columns = [
     {
       title: "#",
-      dataIndex: "id",
-      key: "id",
+      dataIndex: "key",
+      key: "key",
       width: 50,
       fixed: "left",
       align: "center",
@@ -186,9 +226,13 @@ const Book = () => {
       fixed: "right",
       width: 150,
       align: "center",
-      render: (record) => (
+      render: (val, record) => (
         <>
-          <Button type="link" size="small">
+          <Button
+            type="link"
+            size="small"
+            onClick={() => getRoomInfo(true, record.id)}
+          >
             <EyeOutlined />
           </Button>
           <Button type="primary" size="small" style={{ marginLeft: "8px" }}>
@@ -202,19 +246,57 @@ const Book = () => {
   const dateFormatList = ["DD-MM-YYYY", "YYYY-MM-DD"];
 
   function onChangeRange(date, dateString) {
-    console.log(date, dateString);
     formik.setFieldValue("start", dateString[0]);
     formik.setFieldValue("finish", dateString[1]);
     formik.setFieldValue("dateRange", date);
   }
 
+  const filterRooms = (data) => {
+    let dataKindFilter = data.filter(
+      (data) => data.tipoHabitacion.nombre === formik.values.roomKind
+    );
+    console.log("FILTER", dataKindFilter);
+    setFilterTable(formatDataRooms(dataKindFilter));
+  };
+
+  const clearFilter = () => {
+    setFilterTable(null);
+    formik.resetForm();
+  };
+
   useEffect(() => {
-    listRooms();
-    setFilterTable(null)
+    getRoomKinds().then(setRoomKinds);
+    listRooms(); // eslint-disable-next-line
   }, []);
 
   return (
     <div>
+      <Modal
+        title={`Habitación ${room.nombre}`}
+        visible={isModalVisible}
+        onOk={() => setModalVisible(false)}
+        onCancel={() => setModalVisible(false)}
+        cancelButtonProps={{ style: { display: "none" } }}
+      >
+        <div className="room-photo">
+          <img src={room.imagen} alt="Habitación" />
+        </div>
+        <p>{room.descripcion}</p>
+        <Descriptions layout="vertical">
+          <Descriptions.Item label="Nivel">
+            {room.nombreNivel}
+          </Descriptions.Item>
+          <Descriptions.Item label="Tipo Habitación">
+            {room.nombreTipo}
+          </Descriptions.Item>
+          <Descriptions.Item label="Nro Camas">
+            {room.nroCamas}
+          </Descriptions.Item>
+          <Descriptions.Item label="Precio">
+            S/ {room.precio}.00
+          </Descriptions.Item>
+        </Descriptions>
+      </Modal>
       <PageHeader
         className="site-page-header"
         title="Reserva"
@@ -229,37 +311,41 @@ const Book = () => {
               onChange={onChangeRange}
               format={dateFormatList[1]}
             />
+            {formik.errors.dateRange && formik.touched.dateRange ? (
+              <div className="error-field">{formik.errors.dateRange}</div>
+            ) : null}
           </Form.Item>
           <Form.Item label="Tipo de Habitación" style={styleFormItem}>
             <Select
               showSearch
-              style={{ width: 200 }}
-              placeholder="Selecciona un tipo"
+              name="roomKind"
+              placeholder="Seleccione un distrito"
               optionFilterProp="children"
+              style={{ width: "200px" }}
+              value={formik.values.roomKind}
+              onChange={(text) => formik.setFieldValue("roomKind", text)}
               filterOption={(input, option) =>
-                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0
               }
             >
-              <Option value="jack">Jack</Option>
-              <Option value="lucy">Lucy</Option>
-              <Option value="tom">Tom</Option>
+              {roomKinds.map((data) => (
+                <Select.Option key={data.id} value={data.nombre}>
+                  {data.nombre}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
-          <Form.Item label="N° de Camas" style={styleFormItem}>
-            <Select
-              showSearch
-              style={{ width: 200 }}
-              placeholder="Select un número"
-              optionFilterProp="children"
-              filterOption={(input, option) =>
-                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
-            >
-              <Option value="jack">Jack</Option>
-              <Option value="lucy">Lucy</Option>
-              <Option value="tom">Tom</Option>
-            </Select>
-          </Form.Item>
+          {/* <Form.Item label="N° de Camas" style={styleFormItem}>
+            <InputNumber
+              name="numBeds"
+              min={0}
+              max={5}
+              value={formik.values.numBeds}
+              onChange={(value) => formik.setFieldValue("numBeds", value)}
+            />
+          </Form.Item> */}
           <Form.Item
             label=""
             style={{
@@ -267,7 +353,7 @@ const Book = () => {
               alignItems: "flex-end",
             }}
           >
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={loadFilter}>
               Buscar Habitación
             </Button>
           </Form.Item>
@@ -279,7 +365,7 @@ const Book = () => {
             }}
           >
             <Tooltip title="Limpiar Datos">
-              <Button type="ghost">
+              <Button type="ghost" onClick={clearFilter}>
                 <ClearOutlined />
               </Button>
             </Tooltip>

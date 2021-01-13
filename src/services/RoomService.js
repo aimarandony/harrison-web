@@ -1,4 +1,3 @@
-  
 import clienteAxios from "../config/AxiosConfig";
 
 const getRooms = async () => {
@@ -6,4 +5,9 @@ const getRooms = async () => {
   return resp.data;
 };
 
-export { getRooms };
+const getRoomById = async (id) => {
+  const resp = await clienteAxios.get(`/habitaciones/${id}`);
+  return resp.data;
+};
+
+export { getRooms, getRoomById };

@@ -27,7 +27,10 @@ const { SubMenu } = Menu;
 const LayoutCustom = ({ children }) => {
   const history = useHistory();
 
-  const { dispatch } = useContext(AuthContext);
+  const {
+    user: { name },
+    dispatch,
+  } = useContext(AuthContext);
 
   const [collapsed, setCollapsed] = useState(false);
 
@@ -106,7 +109,7 @@ const LayoutCustom = ({ children }) => {
           <Dropdown overlay={menu}>
             <Button type="dashed" size="large">
               <UserOutlined />
-              Aimar Andony
+              {name}
               <DownOutlined />
             </Button>
           </Dropdown>
