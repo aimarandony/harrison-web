@@ -5,9 +5,14 @@ const getBooks = async () => {
   return resp.data;
 };
 
+const createBook = async (data) => {
+  const resp = await clienteAxios.post("/reservas", data);
+  return resp.data;
+};
+
 const findBooksByRangeDate = async (data) => {
   const resp = await clienteAxios.post("/reservas/find-dateTime", data);
   return resp.data;
 };
 
-export { getBooks, findBooksByRangeDate };
+export { getBooks, createBook, findBooksByRangeDate };

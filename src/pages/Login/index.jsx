@@ -44,23 +44,27 @@ const Login = () => {
     validationSchema,
     onSubmit: (value) => {
       setLoadSubmit(true);
-      login(value).then((resp) => {
-        console.log(resp);
-        if (resp.Valido) {
-          dispatch({
-            type: types.login,
-            payload: {
-              name: resp.Usuario.nombre,
-            },
-          });
-          localStorage.setItem("user", JSON.stringify({ logged: true }));
-          history.push("/reserva");
-          message.success("Inicio de Sesión correcto.");
-        } else {
-          message.error("Las Credenciales no son válidas.");
-        }
-        setLoadSubmit(false);
-      });
+      login(value)
+        .then((resp) => {
+          console.log("THEN", resp);
+          if (resp.Valido) {
+            dispatch({
+              type: types.login,
+              payload: {
+                name: resp.Usuario.nombre,
+              },
+            });
+            localStorage.setItem("user", JSON.stringify({ logged: true }));
+            history.push("/reserva");
+            message.success("Inicio de Sesión correcto.");
+          }
+        })
+        .catch((err) => {
+          if (err.response.status === 401) {
+            message.error("Las Credenciales no son válidas.");
+          }
+        })
+        .finally(setLoadSubmit(false));
     },
   });
 

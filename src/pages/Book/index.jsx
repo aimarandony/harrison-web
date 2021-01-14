@@ -5,13 +5,19 @@ import {
   Button,
   PageHeader,
   Table,
-  // Tag,
   DatePicker,
   Select,
   Card,
   Tooltip,
   Modal,
   Descriptions,
+  Drawer,
+  Checkbox,
+  Input,
+  Row,
+  Col,
+  Alert,
+  message,
 } from "antd";
 import { ClearOutlined, EyeOutlined } from "@ant-design/icons";
 
@@ -23,6 +29,10 @@ import { findBooksByRangeDate } from "../../services/BookService";
 import { getRoomKinds } from "../../services/RoomKindService";
 
 import "./Book.css";
+import { getGuests } from "../../services/GuestService";
+
+import moment from "moment";
+import "moment/locale/es";
 
 const { RangePicker } = DatePicker;
 
@@ -33,6 +43,8 @@ const styleFormItem = {
 };
 
 const Book = () => {
+  moment.locale("es");
+
   const [loading, setLoading] = useState(true);
   const [dataSource, setDataSource] = useState([]);
   const [filterTable, setFilterTable] = useState(null);
@@ -40,6 +52,9 @@ const Book = () => {
   const [room, setRoom] = useState({});
   const [isModalVisible, setModalVisible] = useState(false);
   const [loadFilter, setLoadFilter] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [guests, setGuests] = useState([]);
+  const [disabledPlaca, setDisabledPlaca] = useState(true);
 
   const validationSchema = Yup.object().shape({
     dateRange: Yup.array()
@@ -68,6 +83,24 @@ const Book = () => {
         setLoadFilter(false);
         console.log("RESP FORMIK", data);
       });
+    },
+  });
+
+  const validationSchemaBook = Yup.object().shape({});
+
+  const formikBook = useFormik({
+    initialValues: {
+      precioTotal: 0,
+      huesped: {
+        id: null,
+      },
+      habitacion: {
+        id: null,
+      },
+    },
+    validationSchemaBook,
+    onSubmit: (values) => {
+      console.log(values);
     },
   });
 
@@ -181,45 +214,6 @@ const Book = () => {
       width: 150,
       render: (val, record) => <span>S/{record.precio}.00</span>,
     },
-    // {
-    //   title: "Estado",
-    //   dataIndex: "estado",
-    //   key: "estado",
-    //   align: "center",
-    //   render: (val, record) => {
-    //     switch (record.estado) {
-    //       case "DISPONIBLE":
-    //         return <Tag color="green">{record.estado}</Tag>;
-    //       case "OCUPADO":
-    //         return <Tag color="volcano">{record.estado}</Tag>;
-    //       case "MANTENIMIENTO":
-    //         return <Tag color="blue">{record.estado}</Tag>;
-    //       default:
-    //         <Tag color="gold">NO DEFINIDO</Tag>;
-    //         break;
-    //     }
-    //   },
-    //   filters: [
-    //     {
-    //       text: "DISPONIBLE",
-    //       value: "DISPONIBLE",
-    //     },
-    //     {
-    //       text: "OCUPADO",
-    //       value: "OCUPADO",
-    //     },
-    //     {
-    //       text: "MANTENIMIENTO",
-    //       value: "MANTENIMIENTO",
-    //     },
-    //   ],
-    //   filterMultiple: false,
-    //   onFilter: (value, record) => {
-    //     let estado = String(record.estado);
-    //     return estado.indexOf(value) === 0;
-    //   },
-    //   width: 150,
-    // },
     {
       title: "Acciones",
       key: "action",
@@ -235,7 +229,12 @@ const Book = () => {
           >
             <EyeOutlined />
           </Button>
-          <Button type="primary" size="small" style={{ marginLeft: "8px" }}>
+          <Button
+            type="primary"
+            size="small"
+            style={{ marginLeft: "8px" }}
+            onClick={() => openDrawer(record.id, record.precio)}
+          >
             Reservar
           </Button>
         </>
@@ -264,13 +263,148 @@ const Book = () => {
     formik.resetForm();
   };
 
+  const closeDrawer = () => {
+    setDrawerVisible(false);
+  };
+
+  const openDrawer = (id, precio) => {
+    if (filterTable === null) {
+      message.info("Necesita filtrar la fecha inicio y fin.");
+    } else {
+      const start = moment(formik.values.start);
+      const finish = moment(formik.values.finish);
+      const dias = finish.diff(start, "days");
+      formikBook.setFieldValue("precioTotal", precio * dias);
+      formikBook.setFieldValue("habitacion.id", id);
+      setDrawerVisible(true);
+    }
+  };
+
   useEffect(() => {
+    getGuests().then(setGuests);
     getRoomKinds().then(setRoomKinds);
     listRooms(); // eslint-disable-next-line
   }, []);
 
   return (
     <div>
+      <Drawer
+        title="Reserva"
+        placement="right"
+        closable={false}
+        onClose={closeDrawer}
+        visible={drawerVisible}
+        width={400}
+      >
+        <Alert
+          type="info"
+          description={
+            <div>
+              <Descriptions layout="vertical" column={1}>
+                <Descriptions.Item label="Fecha Inicio">
+                  {moment(formik.values.start).format(
+                    "dddd, D MMMM [del] YYYY"
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item label="Fecha Final">
+                  {moment(formik.values.finish).format(
+                    "dddd, D MMMM [del] YYYY"
+                  )}
+                </Descriptions.Item>
+                <Descriptions.Item label="Precio Total">
+                  S/ {formikBook.values.precioTotal}.00
+                </Descriptions.Item>
+              </Descriptions>
+            </div>
+          }
+          style={{ marginBottom: "20px" }}
+        />
+        <Form layout="vertical" onSubmitCapture={formikBook.handleSubmit}>
+          <Form.Item label="Habitación" required>
+            <Select
+              showSearch
+              name="habitacion.id"
+              placeholder="Seleccione una Habitación"
+              optionFilterProp="children"
+              style={{ width: "100%" }}
+              value={formikBook.values.habitacion.id}
+              disabled
+              onChange={(text) =>
+                formikBook.setFieldValue("habitacion.id", text)
+              }
+              filterOption={(input, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {dataSource.map((data) => (
+                <Select.Option key={data.id} value={data.id}>
+                  {String(`(${data.nombre}) ${data.tipo}`)}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item label="Huésped" required>
+            <Select
+              showSearch
+              name="huesped.id"
+              placeholder="Seleccione un huésped"
+              optionFilterProp="children"
+              style={{ width: "100%" }}
+              value={formikBook.values.huesped.id}
+              onChange={(text) => formikBook.setFieldValue("huesped.id", text)}
+              filterOption={(input, option) =>
+                option.props.children
+                  .toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {guests.map((data) => (
+                <Select.Option key={data.id} value={data.id}>
+                  {String(`(${data.documento}) ${data.nombre}`)}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Row gutter={20}>
+            <Col span={12}>
+              <Form.Item label="¿Estacionamiento?">
+                <Checkbox onChange={(e) => setDisabledPlaca(!e.target.checked)}>
+                  {disabledPlaca === true ? "NO" : "SI"}
+                </Checkbox>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Placa de Vehículo">
+                <Input
+                  placeholder="Escriba el nro de Placa"
+                  disabled={disabledPlaca}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={24}>
+            <Col span={12}>
+              <Form.Item label="Saldo Adelantado" required>
+                <Input placeholder="S/ 0.00" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Saldo a Deber">
+                <Input value="S/ 50.00" placeholder="S/ 0.00" readOnly />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block>
+              Registrar Reserva
+            </Button>
+          </Form.Item>
+        </Form>
+      </Drawer>
       <Modal
         title={`Habitación ${room.nombre}`}
         visible={isModalVisible}
