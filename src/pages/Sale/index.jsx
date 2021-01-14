@@ -6,7 +6,7 @@ import { getBooks } from "../../services/BookService";
 import moment from "moment";
 import "moment/locale/es";
 
-const Reception = () => {
+const Sale = () => {
   moment.locale("es");
 
   const [loading, setLoading] = useState(true);
@@ -25,8 +25,10 @@ const Reception = () => {
           " - " +
           moment(data.fechaFinal).format("dddd, D MMMM [del] YYYY");
       });
-      setDataSource(resp);
+      const filterStatus = resp.filter((data) => data.estado === "REALIZADO");
+      setDataSource(filterStatus);
       console.log(resp);
+      console.log("FILTER", filterStatus);
       setLoading(false);
     });
   };
@@ -125,7 +127,10 @@ const Reception = () => {
         <>
           <Button type="link" size="small">
             <EyeOutlined />
-          </Button>          
+          </Button>
+          <Button type="primary" size="small">
+            Vender
+          </Button>
         </>
       ),
     },
@@ -149,8 +154,8 @@ const Reception = () => {
     <div>
       <PageHeader
         className="site-page-header"
-        title="Recepción"
-        subTitle="Recepción de habitaciones."
+        title="Venta"
+        subTitle="Venta de productos a las habitaciones."
       />
       <Input.Search
         className="searchInput"
@@ -169,4 +174,4 @@ const Reception = () => {
   );
 };
 
-export default Reception;
+export default Sale;

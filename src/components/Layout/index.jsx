@@ -70,7 +70,9 @@ const LayoutCustom = ({ children }) => {
             </NavLink>
           </Menu.Item>
           <Menu.Item key="3" icon={<SelectOutlined />}>
-            Check Out
+            <NavLink to="/check-out" activeClassName="active">
+              Check Out
+            </NavLink>
           </Menu.Item>
           <SubMenu key="sub1" icon={<ShoppingCartOutlined />} title="Venta">
             <Menu.Item key="4">
@@ -78,7 +80,11 @@ const LayoutCustom = ({ children }) => {
                 Productos
               </NavLink>
             </Menu.Item>
-            <Menu.Item key="5">Vender</Menu.Item>
+            <Menu.Item key="5">
+              <NavLink to="/venta" activeClassName="active">
+                Vender
+              </NavLink>
+            </Menu.Item>
           </SubMenu>
           <SubMenu key="sub2" icon={<InboxOutlined />} title="Caja">
             <Menu.Item key="6">Apertura</Menu.Item>
@@ -86,7 +92,11 @@ const LayoutCustom = ({ children }) => {
             <Menu.Item key="8">Resumen</Menu.Item>
           </SubMenu>
           <SubMenu key="sub3" icon={<ToolOutlined />} title="Mantenimiento">
-            <Menu.Item key="6">Habitación</Menu.Item>
+            <Menu.Item key="6">
+              <NavLink to="/mantenimiento/habitacion" activeClassName="active">
+                Habitación
+              </NavLink>
+            </Menu.Item>
             <Menu.Item key="7">Categoría</Menu.Item>
             <Menu.Item key="8">Nivel</Menu.Item>
           </SubMenu>

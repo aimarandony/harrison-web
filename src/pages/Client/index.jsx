@@ -107,6 +107,7 @@ const Client = () => {
           .catch(console.warn)
           .finally(formik.resetForm());
       }
+      listGuests();
     },
   });
 
@@ -187,7 +188,7 @@ const Client = () => {
       dataIndex: "documento",
       key: "apellido",
       align: "center",
-      width: 100,
+      width: 120,
     },
     {
       title: "Correo",

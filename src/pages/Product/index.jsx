@@ -74,6 +74,7 @@ const Product = () => {
           .catch(console.warn)
           .finally(formik.resetForm());
       }
+      listProducts();
     },
   });
 
