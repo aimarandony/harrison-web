@@ -19,7 +19,11 @@ body {
   text-align: center;
 }
 
-.ant-page-header.site-page-header{
+.ant-page-header.site-page-header {
   padding: 0;
   margin-bottom: 15px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }

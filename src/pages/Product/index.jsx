@@ -223,7 +223,7 @@ const Product = () => {
       />
       <Input.Search
         className="searchInput"
-        placeholder="Buscar por ..."
+        placeholder="Buscar por nombre..."
         onKeyUpCapture={(e) => keyUpTable(e.target.value)}
         style={{ marginBottom: "20px" }}
       />

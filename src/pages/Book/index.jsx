@@ -5,7 +5,7 @@ import {
   Button,
   PageHeader,
   Table,
-  Tag,
+  // Tag,
   DatePicker,
   Select,
   Card,
@@ -181,45 +181,45 @@ const Book = () => {
       width: 150,
       render: (val, record) => <span>S/{record.precio}.00</span>,
     },
-    {
-      title: "Estado",
-      dataIndex: "estado",
-      key: "estado",
-      align: "center",
-      render: (val, record) => {
-        switch (record.estado) {
-          case "DISPONIBLE":
-            return <Tag color="green">{record.estado}</Tag>;
-          case "OCUPADO":
-            return <Tag color="volcano">{record.estado}</Tag>;
-          case "MANTENIMIENTO":
-            return <Tag color="blue">{record.estado}</Tag>;
-          default:
-            <Tag color="gold">NO DEFINIDO</Tag>;
-            break;
-        }
-      },
-      filters: [
-        {
-          text: "DISPONIBLE",
-          value: "DISPONIBLE",
-        },
-        {
-          text: "OCUPADO",
-          value: "OCUPADO",
-        },
-        {
-          text: "MANTENIMIENTO",
-          value: "MANTENIMIENTO",
-        },
-      ],
-      filterMultiple: false,
-      onFilter: (value, record) => {
-        let estado = String(record.estado);
-        return estado.indexOf(value) === 0;
-      },
-      width: 150,
-    },
+    // {
+    //   title: "Estado",
+    //   dataIndex: "estado",
+    //   key: "estado",
+    //   align: "center",
+    //   render: (val, record) => {
+    //     switch (record.estado) {
+    //       case "DISPONIBLE":
+    //         return <Tag color="green">{record.estado}</Tag>;
+    //       case "OCUPADO":
+    //         return <Tag color="volcano">{record.estado}</Tag>;
+    //       case "MANTENIMIENTO":
+    //         return <Tag color="blue">{record.estado}</Tag>;
+    //       default:
+    //         <Tag color="gold">NO DEFINIDO</Tag>;
+    //         break;
+    //     }
+    //   },
+    //   filters: [
+    //     {
+    //       text: "DISPONIBLE",
+    //       value: "DISPONIBLE",
+    //     },
+    //     {
+    //       text: "OCUPADO",
+    //       value: "OCUPADO",
+    //     },
+    //     {
+    //       text: "MANTENIMIENTO",
+    //       value: "MANTENIMIENTO",
+    //     },
+    //   ],
+    //   filterMultiple: false,
+    //   onFilter: (value, record) => {
+    //     let estado = String(record.estado);
+    //     return estado.indexOf(value) === 0;
+    //   },
+    //   width: 150,
+    // },
     {
       title: "Acciones",
       key: "action",

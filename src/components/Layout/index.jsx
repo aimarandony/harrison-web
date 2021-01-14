@@ -91,7 +91,9 @@ const LayoutCustom = ({ children }) => {
             <Menu.Item key="8">Nivel</Menu.Item>
           </SubMenu>
           <Menu.Item key="9" icon={<UserOutlined />}>
-            Clientes
+            <NavLink to="/clientes" activeClassName="active">
+              Clientes
+            </NavLink>
           </Menu.Item>
           <SubMenu key="sub4" icon={<FileOutlined />} title="Reporte">
             <Menu.Item key="10">Diario</Menu.Item>

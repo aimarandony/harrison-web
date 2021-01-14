@@ -3,7 +3,12 @@ import { Button, Input, Table, Tag } from "antd";
 import React, { useEffect, useState } from "react";
 import { getBooks } from "../../services/BookService";
 
+import moment from "moment";
+import "moment/locale/es";
+
 const Reception = () => {
+  moment.locale("es");
+
   const [loading, setLoading] = useState(true);
   const [filterTable, setFilterTable] = useState(null);
   const [dataSource, setDataSource] = useState([]);
@@ -15,7 +20,10 @@ const Reception = () => {
         data.nombreHuesped = data.huesped.nombre;
         data.documentoHuesped = data.huesped.documento;
         data.nombreHabitacion = data.habitacion.nombre;
-        data.rangoFecha = data.fechaInicio + ' - ' + data.fechaFinal;
+        data.rangoFecha =
+          moment(data.fechaInicio).format("dddd, D MMMM [del] YYYY") +
+          " - " +
+          moment(data.fechaFinal).format("dddd, D MMMM [del] YYYY");
       });
       setDataSource(resp);
       console.log(resp);
@@ -117,9 +125,6 @@ const Reception = () => {
         <>
           <Button type="link" size="small">
             <EyeOutlined />
-          </Button>
-          <Button type="primary" size="small" style={{ marginLeft: "8px" }}>
-            Reservar
           </Button>
         </>
       ),
