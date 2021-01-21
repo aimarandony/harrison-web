@@ -1,7 +1,16 @@
 import { EyeOutlined } from "@ant-design/icons";
-import { Button, Input, PageHeader, Table, Tag } from "antd";
+import {
+  Button,
+  Card,
+  Descriptions,
+  Drawer,
+  Input,
+  PageHeader,
+  Table,
+  Tag,
+} from "antd";
 import React, { useEffect, useState } from "react";
-import { getBooks } from "../../services/BookService";
+import { getBooks, getBookById } from "../../services/BookService";
 
 import moment from "moment";
 import "moment/locale/es";
@@ -12,6 +21,8 @@ const CheckOut = () => {
   const [loading, setLoading] = useState(true);
   const [filterTable, setFilterTable] = useState(null);
   const [dataSource, setDataSource] = useState([]);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [book, setBook] = useState({});
 
   const listRooms = () => {
     getBooks().then((resp) => {
@@ -25,12 +36,17 @@ const CheckOut = () => {
           " - " +
           moment(data.fechaFinal).format("dddd, D MMMM [del] YYYY");
       });
-      const filterStatus = resp.filter((data) => data.estado === "REALIZADO");
+      const filterStatus = resp.filter((data) => data.estado === "COMPLETADO");
       setDataSource(filterStatus);
       console.log(resp);
       console.log("FILTER", filterStatus);
       setLoading(false);
     });
+  };
+
+  const openDrawer = (id) => {
+    getBookById(id).then(setBook);
+    setDrawerVisible(true);
   };
 
   const columns = [
@@ -123,12 +139,16 @@ const CheckOut = () => {
       fixed: "right",
       width: 150,
       align: "center",
-      render: (record) => (
+      render: (values, record) => (
         <>
           <Button type="link" size="small">
             <EyeOutlined />
           </Button>
-          <Button type="primary" size="small">
+          <Button
+            type="primary"
+            size="small"
+            onClick={() => openDrawer(record.id)}
+          >
             Finalizar
           </Button>
         </>
@@ -152,12 +172,53 @@ const CheckOut = () => {
 
   return (
     <div>
-        <PageHeader
+      <Drawer
+        visible={drawerVisible}
+        title="Finalizar Reserva"
+        width={550}
+        placement="right"
+        closable={false}
+        onClose={() => setDrawerVisible(false)}
+      >
+        <Card>
+          <Descriptions layout="vertical">
+            <Descriptions.Item label="Fecha Inicio">
+              {book.fechaInicio}
+            </Descriptions.Item>
+            <Descriptions.Item label="Fecha Final">
+              {book.fechaFinal}
+            </Descriptions.Item>
+            <Descriptions.Item label=""></Descriptions.Item>
+            <Descriptions.Item label="Habitación">
+              {book.habitacion.nombre +
+                " (" +
+                book.habitacion.tipoHabitacion.nombre +
+                ")"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Huesped">
+              {book.huesped.nombre + " (" + book.huesped.documento + ")"}
+            </Descriptions.Item>
+            <Descriptions.Item label="Estacionamiento/Placa">
+              {book.placaVehiculo}
+            </Descriptions.Item>
+            <Descriptions.Item label="Precio Total + IGV">
+              {book.precioTotal}
+            </Descriptions.Item>
+            <Descriptions.Item label="Pago Adelantado">
+              {book.pagoAdelantado}
+            </Descriptions.Item>
+            <Descriptions.Item label="Pago Restante">
+              {book.precioTotal - book.pagoAdelantado}
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </Drawer>
+      <PageHeader
         className="site-page-header"
         title="Check-Out"
         subTitle="Proceso de Check-Out, finalizar hospedaje."
       />
-              <Input.Search
+      <Input.Search
         className="searchInput"
         placeholder="Buscar por Huesped, documento, habitación..."
         onKeyUpCapture={(e) => keyUpTable(e.target.value)}

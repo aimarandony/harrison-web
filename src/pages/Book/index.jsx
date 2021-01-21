@@ -18,6 +18,7 @@ import {
   Col,
   Alert,
   message,
+  InputNumber,
 } from "antd";
 import { ClearOutlined, EyeOutlined } from "@ant-design/icons";
 
@@ -25,11 +26,11 @@ import { getRooms, getRoomById } from "../../services/RoomService";
 
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { findBooksByRangeDate } from "../../services/BookService";
+import { createBook, findBooksByRangeDate } from "../../services/BookService";
 import { getRoomKinds } from "../../services/RoomKindService";
 
 import "./Book.css";
-import { getGuests } from "../../services/GuestService";
+import { getGuestById, getGuests } from "../../services/GuestService";
 
 import moment from "moment";
 import "moment/locale/es";
@@ -55,6 +56,9 @@ const Book = () => {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [guests, setGuests] = useState([]);
   const [disabledPlaca, setDisabledPlaca] = useState(true);
+  const [modalBookDetail, setModalBookDetail] = useState(false);
+  const [tempHuesped, setTempHuesped] = useState("");
+  const [tempHabitacion, setTempHabitacion] = useState("");
 
   const validationSchema = Yup.object().shape({
     dateRange: Yup.array()
@@ -86,11 +90,21 @@ const Book = () => {
     },
   });
 
-  const validationSchemaBook = Yup.object().shape({});
+  const validationSchemaBook = Yup.object().shape({
+    precioTotal: Yup.number().required("Precio requerido"),
+    pagoAdelantado: Yup.number().nullable().required("Pago requerido"),
+    huesped: Yup.object().shape({
+      id: Yup.number().nullable().required("Huésped requerido"),
+    }),
+  });
 
   const formikBook = useFormik({
     initialValues: {
+      fechaFinal: "",
+      fechaInicio: "",
       precioTotal: 0,
+      pagoAdelantado: null,
+      placaVehiculo: "",
       huesped: {
         id: null,
       },
@@ -101,8 +115,32 @@ const Book = () => {
     validationSchemaBook,
     onSubmit: (values) => {
       console.log(values);
+      getGuestById(values.huesped.id).then((resp) => {
+        console.log(resp);
+        setTempHuesped(resp.nombre + " (" + resp.documento + ")");
+      });
+      getRoomById(values.habitacion.id).then((resp) => {
+        console.log(resp);
+        setTempHabitacion(
+          resp.nombre + " (" + resp.tipoHabitacion.nombre + ")"
+        );
+      });
+      setModalBookDetail(true);
     },
   });
+
+  const saveBook = () => {
+    createBook(formikBook.values)
+      .then((resp) => {
+        console.log(resp);
+        message.success("Reserva realizada correctamente");
+      })
+      .catch(() => message.error("Ocurrió un error. Intentelo de nuevo."));
+    setModalBookDetail(false);
+    setDrawerVisible(false);
+    formikBook.resetForm();
+    clearFilter();
+  };
 
   const formatDataRooms = (data) => {
     data.forEach((data, idx) => {
@@ -264,6 +302,7 @@ const Book = () => {
   };
 
   const closeDrawer = () => {
+    formikBook.resetForm();
     setDrawerVisible(false);
   };
 
@@ -274,7 +313,18 @@ const Book = () => {
       const start = moment(formik.values.start);
       const finish = moment(formik.values.finish);
       const dias = finish.diff(start, "days");
-      formikBook.setFieldValue("precioTotal", precio * dias);
+
+      let precioXdias = precio * dias;
+
+      formikBook.setFieldValue(
+        "fechaInicio",
+        formik.values.start + "T06:58:03.747Z"
+      );
+      formikBook.setFieldValue(
+        "fechaFinal",
+        formik.values.finish + "T06:58:03.747Z"
+      );
+      formikBook.setFieldValue("precioTotal", precioXdias + 0.18 * precioXdias);
       formikBook.setFieldValue("habitacion.id", id);
       setDrawerVisible(true);
     }
@@ -288,6 +338,42 @@ const Book = () => {
 
   return (
     <div>
+      <Modal
+        title="Detalle "
+        visible={modalBookDetail}
+        onOk={() => setModalBookDetail(false)}
+        onCancel={() => setModalBookDetail(false)}
+        footer={
+          <Button type="primary" onClick={saveBook}>
+            Confirmar Datos
+          </Button>
+        }
+      >
+        <Descriptions layout="vertical">
+          <Descriptions.Item label="Fecha Inicio">
+            {moment(formik.values.start).format("dddd, D MMMM [del] YYYY")}
+          </Descriptions.Item>
+          <Descriptions.Item label="Fecha Final">
+            {moment(formik.values.finish).format("dddd, D MMMM [del] YYYY")}
+          </Descriptions.Item>
+          <Descriptions.Item label=""></Descriptions.Item>
+          <Descriptions.Item label="Habitación">
+            {tempHabitacion}
+          </Descriptions.Item>
+          <Descriptions.Item label="Huesped">{tempHuesped}</Descriptions.Item>
+          <Descriptions.Item label="Estacionamiento">NO</Descriptions.Item>
+          <Descriptions.Item label="Precio Total + IGV">
+            S/ {formikBook.values.precioTotal}
+          </Descriptions.Item>
+          <Descriptions.Item label="Pago Adelantado">
+            S/ {formikBook.values.pagoAdelantado}
+          </Descriptions.Item>
+          <Descriptions.Item label="Pago Restante">
+            S/{" "}
+            {formikBook.values.precioTotal - formikBook.values.pagoAdelantado}
+          </Descriptions.Item>
+        </Descriptions>
+      </Modal>
       <Drawer
         title="Reserva"
         placement="right"
@@ -311,8 +397,8 @@ const Book = () => {
                     "dddd, D MMMM [del] YYYY"
                   )}
                 </Descriptions.Item>
-                <Descriptions.Item label="Precio Total">
-                  S/ {formikBook.values.precioTotal}.00
+                <Descriptions.Item label="Precio Total + IGV">
+                  S/ {formikBook.values.precioTotal}
                 </Descriptions.Item>
               </Descriptions>
             </div>
@@ -367,6 +453,9 @@ const Book = () => {
                 </Select.Option>
               ))}
             </Select>
+            {formikBook.errors.huesped && formikBook.touched.huesped ? (
+              <div className="error-field">{formikBook.errors.huesped.id}</div>
+            ) : null}
           </Form.Item>
 
           <Row gutter={20}>
@@ -380,6 +469,9 @@ const Book = () => {
             <Col span={12}>
               <Form.Item label="Placa de Vehículo">
                 <Input
+                  name="placaVehiculo"
+                  value={formikBook.values.placaVehiculo}
+                  onChange={formikBook.handleChange}
                   placeholder="Escriba el nro de Placa"
                   disabled={disabledPlaca}
                 />
@@ -389,12 +481,35 @@ const Book = () => {
           <Row gutter={24}>
             <Col span={12}>
               <Form.Item label="Saldo Adelantado" required>
-                <Input placeholder="S/ 0.00" />
+                <InputNumber
+                  name="pagoAdelantado"
+                  min={0}
+                  max={formikBook.values.precioTotal}
+                  value={formikBook.values.pagoAdelantado}
+                  onChange={(value) =>
+                    formikBook.setFieldValue("pagoAdelantado", value)
+                  }
+                  style={{ width: "100%" }}
+                  placeholder="S/ 0.00"
+                />
+                {formikBook.errors.pagoAdelantado &&
+                formikBook.touched.pagoAdelantado ? (
+                  <div className="error-field">
+                    {formikBook.errors.pagoAdelantado}
+                  </div>
+                ) : null}
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item label="Saldo a Deber">
-                <Input value="S/ 50.00" placeholder="S/ 0.00" readOnly />
+                <Input
+                  value={
+                    formikBook.values.precioTotal -
+                    formikBook.values.pagoAdelantado
+                  }
+                  placeholder="S/ 0.00"
+                  readOnly
+                />
               </Form.Item>
             </Col>
           </Row>

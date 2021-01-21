@@ -1,7 +1,7 @@
 import { EyeOutlined } from "@ant-design/icons";
-import { Button, Input, PageHeader, Table, Tag } from "antd";
+import { Button, Input, message, PageHeader, Table, Tag } from "antd";
 import React, { useEffect, useState } from "react";
-import { getBooks } from "../../services/BookService";
+import { changeBookStatus, getBooks } from "../../services/BookService";
 
 import moment from "moment";
 import "moment/locale/es";
@@ -13,7 +13,7 @@ const Reception = () => {
   const [filterTable, setFilterTable] = useState(null);
   const [dataSource, setDataSource] = useState([]);
 
-  const listRooms = () => {
+  const listBooks = () => {
     getBooks().then((resp) => {
       resp.forEach((data) => {
         data.key = data.id;
@@ -28,6 +28,20 @@ const Reception = () => {
       setDataSource(resp);
       console.log(resp);
       setLoading(false);
+    });
+  };
+
+  const bokStatusChange = (id) => {
+    changeBookStatus(
+      {
+        estado: "COMPLETADO",
+      },
+      id
+    ).then((resp) => {
+      listBooks();
+      message.info(
+        `Habitación ${resp.habitacion.nombre} activado. (COMPLETADO)`
+      );
     });
   };
 
@@ -74,7 +88,7 @@ const Reception = () => {
       key: "precioTotal",
       align: "center",
       width: 150,
-      render: (val, record) => <span>S/{record.precioTotal}.00</span>,
+      render: (val, record) => <span>S/{record.precioTotal}</span>,
     },
     {
       title: "Estado",
@@ -121,11 +135,20 @@ const Reception = () => {
       fixed: "right",
       width: 150,
       align: "center",
-      render: (record) => (
+      render: (value, record) => (
         <>
           <Button type="link" size="small">
             <EyeOutlined />
-          </Button>          
+          </Button>
+          {record.estado === "PENDIENTE" ? (
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => bokStatusChange(record.id)}
+            >
+              Activar
+            </Button>
+          ) : null}
         </>
       ),
     },
@@ -142,7 +165,7 @@ const Reception = () => {
   };
 
   useEffect(() => {
-    listRooms();
+    listBooks();
   }, []);
 
   return (
