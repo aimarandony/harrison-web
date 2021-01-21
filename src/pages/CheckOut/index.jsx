@@ -36,7 +36,7 @@ const CheckOut = () => {
           " - " +
           moment(data.fechaFinal).format("dddd, D MMMM [del] YYYY");
       });
-      const filterStatus = resp.filter((data) => data.estado === "COMPLETADO");
+      const filterStatus = resp.filter((data) => data.estado === "ACTIVO");
       setDataSource(filterStatus);
       console.log(resp);
       console.log("FILTER", filterStatus);
@@ -45,7 +45,13 @@ const CheckOut = () => {
   };
 
   const openDrawer = (id) => {
-    getBookById(id).then(setBook);
+    getBookById(id).then((resp) => {
+      resp.nombreHabitacion = resp.habitacion.nombre;
+      resp.nombreTipoHabitacion = resp.habitacion.tipoHabitacion.nombre;
+        resp.nombreHuesped = resp.huesped.nombre;
+        resp.documentoHuesped = resp.huesped.documento;
+      setBook(resp);
+    });
     setDrawerVisible(true);
   };
 
@@ -103,10 +109,10 @@ const CheckOut = () => {
         switch (record.estado) {
           case "PENDIENTE":
             return <Tag color="volcano">{record.estado}</Tag>;
-          case "REALIZADO":
-            return <Tag color="blue">{record.estado}</Tag>;
-          case "COMPLETADO":
+          case "ACTIVO":
             return <Tag color="green">{record.estado}</Tag>;
+          case "FINALIZADO":
+            return <Tag color="blue">{record.estado}</Tag>;
           default:
             <Tag color="gold">NO DEFINIDO</Tag>;
             break;
@@ -118,12 +124,12 @@ const CheckOut = () => {
           value: "PENDIENTE",
         },
         {
-          text: "REALIZADO",
-          value: "REALIZADO",
+          text: "ACTIVO",
+          value: "ACTIVO",
         },
         {
-          text: "COMPLETADO",
-          value: "COMPLETADO",
+          text: "FINALIZADO",
+          value: "FINALIZADO",
         },
       ],
       filterMultiple: false,
@@ -190,13 +196,10 @@ const CheckOut = () => {
             </Descriptions.Item>
             <Descriptions.Item label=""></Descriptions.Item>
             <Descriptions.Item label="Habitación">
-              {book.habitacion.nombre +
-                " (" +
-                book.habitacion.tipoHabitacion.nombre +
-                ")"}
+              {book.nombreHabitacion + " (" + book.nombreTipoHabitacion + ")"}
             </Descriptions.Item>
             <Descriptions.Item label="Huesped">
-              {book.huesped.nombre + " (" + book.huesped.documento + ")"}
+              {book.nombreHuesped + " (" + book.documentoHuesped + ")"}
             </Descriptions.Item>
             <Descriptions.Item label="Estacionamiento/Placa">
               {book.placaVehiculo}

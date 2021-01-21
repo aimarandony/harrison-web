@@ -34,13 +34,13 @@ const Reception = () => {
   const bokStatusChange = (id) => {
     changeBookStatus(
       {
-        estado: "COMPLETADO",
+        estado: "ACTIVO",
       },
       id
     ).then((resp) => {
       listBooks();
       message.info(
-        `Habitación ${resp.habitacion.nombre} activado. (COMPLETADO)`
+        `Habitación ${resp.habitacion.nombre} activado.`
       );
     });
   };
@@ -99,10 +99,10 @@ const Reception = () => {
         switch (record.estado) {
           case "PENDIENTE":
             return <Tag color="volcano">{record.estado}</Tag>;
-          case "REALIZADO":
-            return <Tag color="blue">{record.estado}</Tag>;
-          case "COMPLETADO":
+          case "ACTIVO":
             return <Tag color="green">{record.estado}</Tag>;
+          case "FINALIZADO":
+            return <Tag color="blue">{record.estado}</Tag>;
           default:
             <Tag color="gold">NO DEFINIDO</Tag>;
             break;
@@ -114,12 +114,12 @@ const Reception = () => {
           value: "PENDIENTE",
         },
         {
-          text: "REALIZADO",
-          value: "REALIZADO",
+          text: "ACTIVO",
+          value: "ACTIVO",
         },
         {
-          text: "COMPLETADO",
-          value: "COMPLETADO",
+          text: "FINALIZADO",
+          value: "FINALIZADO",
         },
       ],
       filterMultiple: false,
