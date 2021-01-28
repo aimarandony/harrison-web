@@ -1,19 +1,28 @@
 import { EyeOutlined } from "@ant-design/icons";
 import {
+  Alert,
   Button,
-  Card,
   Descriptions,
   Drawer,
   Input,
   PageHeader,
   Table,
   Tag,
+  Form,
+  message,
 } from "antd";
 import React, { useEffect, useState } from "react";
-import { getBooks, getBookById } from "../../services/BookService";
+import {
+  getBooks,
+  getBookById,
+  changeBookStatus,
+} from "../../services/BookService";
 
 import moment from "moment";
 import "moment/locale/es";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { createFactura } from "../../services/FacturaService";
 
 const CheckOut = () => {
   moment.locale("es");
@@ -23,6 +32,35 @@ const CheckOut = () => {
   const [dataSource, setDataSource] = useState([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [book, setBook] = useState({});
+
+  const validationSchema = Yup.object({});
+
+  const { handleSubmit, setFieldValue, values, resetForm } = useFormik({
+    initialValues: {
+      ruc: "15216477891",
+      razonSocial: "HOTEL HARRISON",
+      lateCheckOut: null,
+      estado: "PENDIENTE",
+      reserva: {
+        id: null,
+      },
+      caja: {
+        id: 1,
+      },
+    },
+    validationSchema,
+    onSubmit: (data) => {
+      console.log(data);
+      createFactura(data).then((resp) => {
+        console.log("RESP", resp);
+        changeBookStatus("FINALIZADO", values.reserva.id).then(console.log);
+        message.success("Hospedaje finalizado.")
+      });
+      listRooms();
+      resetForm();
+      setDrawerVisible(false);
+    },
+  });
 
   const listRooms = () => {
     getBooks().then((resp) => {
@@ -48,10 +86,11 @@ const CheckOut = () => {
     getBookById(id).then((resp) => {
       resp.nombreHabitacion = resp.habitacion.nombre;
       resp.nombreTipoHabitacion = resp.habitacion.tipoHabitacion.nombre;
-        resp.nombreHuesped = resp.huesped.nombre;
-        resp.documentoHuesped = resp.huesped.documento;
+      resp.nombreHuesped = resp.huesped.nombre;
+      resp.documentoHuesped = resp.huesped.documento;
       setBook(resp);
     });
+    setFieldValue("reserva.id", id);
     setDrawerVisible(true);
   };
 
@@ -186,35 +225,58 @@ const CheckOut = () => {
         closable={false}
         onClose={() => setDrawerVisible(false)}
       >
-        <Card>
-          <Descriptions layout="vertical">
-            <Descriptions.Item label="Fecha Inicio">
-              {book.fechaInicio}
-            </Descriptions.Item>
-            <Descriptions.Item label="Fecha Final">
-              {book.fechaFinal}
-            </Descriptions.Item>
-            <Descriptions.Item label=""></Descriptions.Item>
-            <Descriptions.Item label="Habitación">
-              {book.nombreHabitacion + " (" + book.nombreTipoHabitacion + ")"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Huesped">
-              {book.nombreHuesped + " (" + book.documentoHuesped + ")"}
-            </Descriptions.Item>
-            <Descriptions.Item label="Estacionamiento/Placa">
-              {book.placaVehiculo}
-            </Descriptions.Item>
-            <Descriptions.Item label="Precio Total + IGV">
-              {book.precioTotal}
-            </Descriptions.Item>
-            <Descriptions.Item label="Pago Adelantado">
-              {book.pagoAdelantado}
-            </Descriptions.Item>
-            <Descriptions.Item label="Pago Restante">
-              {book.precioTotal - book.pagoAdelantado}
-            </Descriptions.Item>
-          </Descriptions>
-        </Card>
+        <Alert
+          type="info"
+          banner
+          showIcon={false}
+          style={{ paddingBottom: "2px", marginBottom: "20px" }}
+          description={
+            <Descriptions layout="vertical">
+              <Descriptions.Item label="Fecha Inicio">
+                {book.fechaInicio}
+              </Descriptions.Item>
+              <Descriptions.Item label="Fecha Final">
+                {book.fechaFinal}
+              </Descriptions.Item>
+              <Descriptions.Item label=""></Descriptions.Item>
+              <Descriptions.Item label="Habitación">
+                {book.nombreHabitacion + " (" + book.nombreTipoHabitacion + ")"}
+              </Descriptions.Item>
+              <Descriptions.Item label="Huesped">
+                {book.nombreHuesped + " (" + book.documentoHuesped + ")"}
+              </Descriptions.Item>
+              <Descriptions.Item label="Estacionamiento/Placa">
+                {book.placaVehiculo === null
+                  ? "NO REGISTRADO"
+                  : book.placaVehiculo}
+              </Descriptions.Item>
+              <Descriptions.Item label="Precio Total">
+                {book.precioTotal}
+              </Descriptions.Item>
+              <Descriptions.Item label="Pago Adelantado">
+                {book.pagoAdelantado}
+              </Descriptions.Item>
+              <Descriptions.Item label="Pago Restante">
+                {book.precioTotal - book.pagoAdelantado}
+              </Descriptions.Item>
+            </Descriptions>
+          }
+        />
+        <Form layout="vertical" onSubmitCapture={handleSubmit}>
+          <Form.Item label="Pago Restante">
+            <Input
+              type="number"
+              name="pagoRestante"
+              min={book.precioTotal - book.pagoAdelantado}
+              max={book.precioTotal - book.pagoAdelantado}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block>
+              Finalizar Reserva
+            </Button>
+          </Form.Item>
+        </Form>
       </Drawer>
       <PageHeader
         className="site-page-header"

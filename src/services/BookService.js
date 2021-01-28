@@ -15,8 +15,8 @@ const createBook = async (data) => {
   return resp.data;
 };
 
-const changeBookStatus = async (data, id) => {
-  const resp = await clienteAxios.patch(`/reservas/${id}`, data);
+const changeBookStatus = async (estado, id) => {
+  const resp = await clienteAxios.patch(`/reservas/${id}/${estado}`);
   return resp.data;
 };
 

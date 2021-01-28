@@ -32,16 +32,9 @@ const Reception = () => {
   };
 
   const bokStatusChange = (id) => {
-    changeBookStatus(
-      {
-        estado: "ACTIVO",
-      },
-      id
-    ).then((resp) => {
+    changeBookStatus("ACTIVO", id).then((resp) => {
       listBooks();
-      message.info(
-        `Habitación ${resp.habitacion.nombre} activado.`
-      );
+      message.info(`Habitación ${resp.habitacion.nombre} activado.`);
     });
   };
 
