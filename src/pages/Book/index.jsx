@@ -112,7 +112,7 @@ const Book = () => {
         id: null,
       },
     },
-    validationSchemaBook,
+    validationSchema: validationSchemaBook,
     onSubmit: (values) => {
       console.log(values);
       getGuestById(values.huesped.id).then((resp) => {

@@ -1,7 +1,7 @@
 import React from "react";
 import { Switch, Route, Redirect } from "react-router-dom";
 import Layout from "../components/Layout";
-import Book from "../pages/Book";
+import Book2 from "../pages/Book2";
 import CheckOut from "../pages/CheckOut";
 import Client from "../pages/Client";
 import Product from "../pages/Product";
@@ -13,7 +13,7 @@ export const DashboardRoutes = () => {
   return (
     <Layout>
       <Switch>
-        <Route exact path="/reserva" component={Book} />
+        <Route exact path="/reserva" component={Book2} />
         <Route exact path="/recepcion" component={Reception} />
         <Route exact path="/check-out" component={CheckOut} />
         <Route exact path="/productos" component={Product} />

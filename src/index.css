@@ -27,3 +27,7 @@ body {
 .cursor-pointer {
   cursor: pointer;
 }
+
+.ant-drawer-wrapper-body .ant-drawer-body{
+  padding-bottom: 0;
+}
