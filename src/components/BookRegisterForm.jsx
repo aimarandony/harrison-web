@@ -21,13 +21,19 @@ import {
 
 import moment from "moment";
 import "moment/locale/es";
+
+import GuestRegisterForm from "./GuestRegisterForm";
+
 import { getRooms } from "../services/RoomService";
 import { getGuests } from "../services/GuestService";
 import { PlusOutlined } from "@ant-design/icons";
-import GuestRegisterForm from "./GuestRegisterForm";
-import { createBook } from "../services/BookService";
+import { changeBookStatus, createBook } from "../services/BookService";
 
-const BookRegisterForm = ({ status, onSetStatus }) => {
+const BookRegisterForm = ({
+  status,
+  onSetStatus,
+  onSetRegisteredBook = null,
+}) => {
   moment.locale("es");
 
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -73,6 +79,15 @@ const BookRegisterForm = ({ status, onSetStatus }) => {
         .then((resp) => {
           message.success("Reserva registrada correctamente.");
           console.info("RESP", resp);
+          if (
+            values.fechaInicio.substring(0, 10) ===
+            moment().format("YYYY-MM-DD")
+          ) {
+            changeBookStatus("ACTIVO", resp.id);
+          }
+          if (onSetRegisteredBook !== null) {
+            onSetRegisteredBook(true);
+          }
         })
         .catch((err) => {
           message.error("Ocurrio un problema al registrar.");
@@ -117,7 +132,6 @@ const BookRegisterForm = ({ status, onSetStatus }) => {
 
   useEffect(() => {
     if (guestRegistered) {
-      getGuests().then(setGuests);
       setGuestRegistered(false);
     }
     getRooms().then((resp) => {
@@ -126,7 +140,9 @@ const BookRegisterForm = ({ status, onSetStatus }) => {
       });
       setRooms(resp);
     });
-    getGuests().then(setGuests);
+    getGuests().then((resp) => {
+      setGuests(resp);
+    });
     setDrawerVisible(status);
     initPreDataBook(); // eslint-disable-next-line
   }, [status, guestRegistered]);

@@ -10,4 +10,9 @@ const getRoomById = async (id) => {
   return resp.data;
 };
 
-export { getRooms, getRoomById };
+const changeStatusRoom = async (id, status) => {
+  const resp = await clienteAxios.patch(`/habitaciones/${id}/${status}`);
+  return resp.data;
+};
+
+export { getRooms, getRoomById, changeStatusRoom };
