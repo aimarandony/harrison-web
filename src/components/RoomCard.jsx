@@ -40,6 +40,9 @@ function RoomCard({ roomData, onClick, onSetChangeStatusRoom }) {
         case "LIMPIEZA":
           setColorStatus("#4BC9FF");
           break;
+          case "RESERVADO":
+          setColorStatus("#FFB422");
+          break;
         default:
           break;
       }

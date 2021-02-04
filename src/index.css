@@ -43,10 +43,15 @@ body {
 .table-prod thead tr {
   padding: 10px;
 }
-.table-prod thead tr th {
-  padding: 10px 20px;
-}
-.table-prod tbody tr td {
+.table-prod thead tr th,
+.table-prod tbody tr td,
+.table-prod tfoot tr td {
   padding: 10px 20px;
 }
 
+.table-prod tfoot tr td{
+  background: #deecff;
+  border: 1px dashed #549eff;
+  color: #161616;
+  font-weight: bold;
+}

@@ -23,6 +23,7 @@ import "moment/locale/es";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createFactura } from "../../services/FacturaService";
+import { getConsumosByReservaId } from "../../services/ConsumoService";
 
 const CheckOut = () => {
   moment.locale("es");
@@ -32,6 +33,9 @@ const CheckOut = () => {
   const [dataSource, setDataSource] = useState([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [book, setBook] = useState({});
+  const [consumo, setConsumo] = useState([]);
+  const [totalConsumo, setTotalConsumo] = useState(0);
+  const [totalNeto, setTotalNeto] = useState(0);
 
   const validationSchema = Yup.object({});
 
@@ -54,7 +58,7 @@ const CheckOut = () => {
       createFactura(data).then((resp) => {
         console.log("RESP", resp);
         changeBookStatus("FINALIZADO", values.reserva.id).then(console.log);
-        message.success("Hospedaje finalizado.")
+        message.success("Hospedaje finalizado.");
       });
       listRooms();
       resetForm();
@@ -82,6 +86,12 @@ const CheckOut = () => {
     });
   };
 
+  const closeDrawer = () => {
+    setTotalConsumo(0);
+    setTotalNeto(0);
+    setDrawerVisible(false);
+  };
+
   const openDrawer = (id) => {
     getBookById(id).then((resp) => {
       resp.nombreHabitacion = resp.habitacion.nombre;
@@ -91,6 +101,22 @@ const CheckOut = () => {
       setBook(resp);
     });
     setFieldValue("reserva.id", id);
+
+    getConsumosByReservaId(id).then((resp) => {
+      let totalNeto = 0;
+      resp.forEach((data) => {
+        console.log(data);
+        data.nombreProducto = data.producto.nombre;
+        data.precioProducto = data.producto.precio;
+        totalNeto += data.total;
+      });
+      setConsumo(resp);
+      setTotalConsumo(totalNeto);
+
+      let debeReserva = Number(book.precioTotal) - Number(book.pagoAdelantado);
+      setTotalNeto(debeReserva + Number(totalNeto));
+    });
+
     setDrawerVisible(true);
   };
 
@@ -213,7 +239,7 @@ const CheckOut = () => {
 
   useEffect(() => {
     listRooms();
-  }, []);
+  }, [drawerVisible]);
 
   return (
     <div>
@@ -223,7 +249,7 @@ const CheckOut = () => {
         width={550}
         placement="right"
         closable={false}
-        onClose={() => setDrawerVisible(false)}
+        onClose={closeDrawer}
       >
         <Alert
           type="info"
@@ -231,46 +257,89 @@ const CheckOut = () => {
           showIcon={false}
           style={{ paddingBottom: "2px", marginBottom: "20px" }}
           description={
-            <Descriptions layout="vertical">
-              <Descriptions.Item label="Fecha Inicio">
-                {book.fechaInicio}
-              </Descriptions.Item>
-              <Descriptions.Item label="Fecha Final">
-                {book.fechaFinal}
-              </Descriptions.Item>
-              <Descriptions.Item label=""></Descriptions.Item>
-              <Descriptions.Item label="Habitación">
-                {book.nombreHabitacion + " (" + book.nombreTipoHabitacion + ")"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Huesped">
-                {book.nombreHuesped + " (" + book.documentoHuesped + ")"}
-              </Descriptions.Item>
-              <Descriptions.Item label="Estacionamiento/Placa">
-                {book.placaVehiculo === null
-                  ? "NO REGISTRADO"
-                  : book.placaVehiculo}
-              </Descriptions.Item>
-              <Descriptions.Item label="Precio Total">
-                {book.precioTotal}
-              </Descriptions.Item>
-              <Descriptions.Item label="Pago Adelantado">
-                {book.pagoAdelantado}
-              </Descriptions.Item>
-              <Descriptions.Item label="Pago Restante">
-                {book.precioTotal - book.pagoAdelantado}
-              </Descriptions.Item>
-            </Descriptions>
+            <>
+              <Descriptions layout="vertical">
+                <Descriptions.Item label="Fecha Inicio">
+                  {book.fechaInicio}
+                </Descriptions.Item>
+                <Descriptions.Item label="Fecha Final">
+                  {book.fechaFinal}
+                </Descriptions.Item>
+                <Descriptions.Item label=""></Descriptions.Item>
+                <Descriptions.Item label="Habitación">
+                  {book.nombreHabitacion +
+                    " (" +
+                    book.nombreTipoHabitacion +
+                    ")"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Huesped">
+                  {book.nombreHuesped + " (" + book.documentoHuesped + ")"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Estacionamiento/Placa">
+                  {book.placaVehiculo === null
+                    ? "NO REGISTRADO"
+                    : book.placaVehiculo}
+                </Descriptions.Item>
+                <Descriptions.Item label="Precio Total">
+                  {book.precioTotal}
+                </Descriptions.Item>
+                <Descriptions.Item label="Pago Adelantado">
+                  {book.pagoAdelantado}
+                </Descriptions.Item>
+                <Descriptions.Item label="Pago Restante">
+                  {book.precioTotal - book.pagoAdelantado}
+                </Descriptions.Item>
+              </Descriptions>
+              <table
+                className="table-prod"
+                style={{ marginTop: "10px", marginBottom: "10px" }}
+              >
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {consumo.length !== 0
+                    ? consumo.map((data, idx) => (
+                        <tr key={data.id}>
+                          {}
+                          <td>{idx + 1}</td>
+                          <td>
+                            (S/{data.precioProducto}){" "}
+                            {String(data.nombreProducto).length > 15
+                              ? `${String(data.nombreProducto).substring(
+                                  0,
+                                  15
+                                )} ...`
+                              : data.nombreProducto}
+                          </td>
+                          <td>{data.cantidad}</td>
+                          <td>S/{data.total}</td>
+                        </tr>
+                      ))
+                    : null}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan="4" align="right">
+                      Total: S/{totalConsumo}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </>
           }
         />
+        <Alert
+          message={<b>TOTAL A PAGAR: S/{totalNeto}</b>}
+          type="warning"
+          style={{ marginBottom: "20px" }}
+        />
         <Form layout="vertical" onSubmitCapture={handleSubmit}>
-          <Form.Item label="Pago Restante">
-            <Input
-              type="number"
-              name="pagoRestante"
-              min={book.precioTotal - book.pagoAdelantado}
-              max={book.precioTotal - book.pagoAdelantado}
-            />
-          </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
               Finalizar Reserva

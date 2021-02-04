@@ -5,4 +5,9 @@ const createConsumo = async (data) => {
   return resp.data;
 };
 
-export { createConsumo };
+const getConsumosByReservaId = async (id) => {
+  const resp = await clienteAxios.get("/consumos/reservas/" + id);
+  return resp.data;
+};
+
+export { createConsumo, getConsumosByReservaId };

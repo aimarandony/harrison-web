@@ -8,7 +8,6 @@ import {
   BellOutlined,
   SelectOutlined,
   ShoppingCartOutlined,
-  InboxOutlined,
   ToolOutlined,
   KeyOutlined,
   DownOutlined,
@@ -86,11 +85,11 @@ const LayoutCustom = ({ children }) => {
               </NavLink>
             </Menu.Item>
           </SubMenu>
-          <SubMenu key="sub2" icon={<InboxOutlined />} title="Caja">
+          {/* <SubMenu key="sub2" icon={<InboxOutlined />} title="Caja">
             <Menu.Item key="6">Apertura</Menu.Item>
             <Menu.Item key="7">Cierre</Menu.Item>
             <Menu.Item key="8">Resumen</Menu.Item>
-          </SubMenu>
+          </SubMenu> */}
           <SubMenu key="sub3" icon={<ToolOutlined />} title="Mantenimiento">
             <Menu.Item key="6">
               <NavLink to="/mantenimiento/habitacion" activeClassName="active">

@@ -80,7 +80,7 @@ function RoomFilterForm2() {
           }}
         >
           <Button type="primary" htmlType="submit">
-            Buscar Habitación
+            Filtrar
           </Button>
         </Form.Item>
         <Form.Item

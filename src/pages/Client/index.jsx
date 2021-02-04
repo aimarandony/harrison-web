@@ -25,8 +25,6 @@ import {
   updateGuest,
 } from "../../services/GuestService";
 import { getDocumentsType } from "../../services/DocumentType";
-import { getGuestTypes } from "../../services/GuestType";
-
 let key = "load";
 
 const Client = () => {
@@ -35,7 +33,6 @@ const Client = () => {
   const [filterTable, setFilterTable] = useState(null);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [typesDocuments, setTypesDocuments] = useState([]);
-  const [typesGuest, setTypesGuest] = useState([]);
 
   const listGuests = () => {
     getGuests().then((resp) => {
@@ -62,9 +59,6 @@ const Client = () => {
       .trim()
       .matches(/^[0-9]*$/, "Solo se admiten números.")
       .length(9, "Solo se admiten 9 dígitos."),
-    tipoHuesped: Yup.object().shape({
-      id: Yup.number().nullable().required("Tipo Huésped requerido"),
-    }),
     tipoDocumento: Yup.object().shape({
       id: Yup.number().nullable().required("Tipo Documento requerido"),
     }),
@@ -80,9 +74,6 @@ const Client = () => {
       telefono: "",
       tipoDocumento: {
         id: null,
-      },
-      tipoHuesped: {
-        id: 1,
       },
     },
     validationSchema,
@@ -273,7 +264,6 @@ const Client = () => {
   useEffect(() => {
     listGuests();
     getDocumentsType().then(setTypesDocuments);
-    getGuestTypes().then(setTypesGuest);
   }, []);
 
   return (
@@ -370,32 +360,12 @@ const Client = () => {
               <div className="error-field">{formik.errors.telefono}</div>
             ) : null}
           </Form.Item>
-          <Form.Item label="Tipo Huésped" required>
-            <Select
-              name="tipoHuesped.id"
-              placeholder="Seleccione un Tipo de Huésped"
-              style={{ width: "100%" }}
-              value={formik.values.tipoHuesped.id}
-              onChange={(text) => formik.setFieldValue("tipoHuesped.id", text)}
-              disabled
-            >
-              {typesGuest.map((data) => (
-                <Select.Option key={data.id} value={data.id}>
-                  {data.nombre}
-                </Select.Option>
-              ))}
-            </Select>
-            {formik.errors.tipoHuesped && formik.touched.tipoHuesped ? (
-              <div className="error-field">{formik.errors.tipoHuesped.id}</div>
-            ) : null}
-          </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" block>
               Guardar
             </Button>
           </Form.Item>
         </Form>
-      
       </Drawer>
       <PageHeader
         className="site-page-header"

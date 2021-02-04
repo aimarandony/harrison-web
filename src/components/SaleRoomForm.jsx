@@ -7,6 +7,7 @@ import {
   Drawer,
   Form,
   Input,
+  message,
   Row,
   Select,
 } from "antd";
@@ -112,8 +113,9 @@ function SaleRoomForm({ status, setStatus, bookId }) {
         console.log("CONSUMO CREADO", resp);
       });
     });
-    productFormik.resetForm()
-    closeDrawer()
+    productFormik.resetForm();
+    message.success("Venta(s) registradas correctamente.");
+    closeDrawer();
   };
 
   useEffect(() => {

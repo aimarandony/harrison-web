@@ -49,6 +49,9 @@ function RoomCardList() {
         break;
       case "MANTENIMIENTO":
         break;
+      case "RESERVADO":
+        alert("ACTIVAR HABITACIÖN")
+        break;
       default:
         break;
     }

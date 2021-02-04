@@ -81,9 +81,14 @@ const BookRegisterForm = ({
           console.info("RESP", resp);
           if (
             values.fechaInicio.substring(0, 10) ===
-            moment().format("YYYY-MM-DD")
+              moment().format("YYYY-MM-DD") &&
+            values.fechaFinal.substring(0, 10) ===
+              moment().add(1, "days").format("YYYY-MM-DD")
           ) {
-            changeBookStatus("ACTIVO", resp.id);
+            console.log("change estado activo reserva");
+            // setTimeout(() => {
+              changeBookStatus("ACTIVO", resp.id);
+            // }, 5000);
           }
           if (onSetRegisteredBook !== null) {
             onSetRegisteredBook(true);
