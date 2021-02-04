@@ -28,6 +28,25 @@ body {
   cursor: pointer;
 }
 
-.ant-drawer-wrapper-body .ant-drawer-body{
+.ant-drawer-wrapper-body .ant-drawer-body {
   padding-bottom: 0;
 }
+
+.table-prod {
+  width: 100%;
+  background: #f8f9fc;
+  color: #292929;
+}
+.table-prod thead {
+  background: #cae2f5;
+}
+.table-prod thead tr {
+  padding: 10px;
+}
+.table-prod thead tr th {
+  padding: 10px 20px;
+}
+.table-prod tbody tr td {
+  padding: 10px 20px;
+}
+

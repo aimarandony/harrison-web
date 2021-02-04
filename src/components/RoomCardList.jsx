@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import RoomCard from "./RoomCard";
 
-import { Card, Row } from "antd";
+import { BackTop, Card, Row } from "antd";
 import { getRooms } from "../services/RoomService";
 import BookRegisterForm from "./BookRegisterForm";
 
@@ -45,7 +45,7 @@ function RoomCardList() {
         setBookFormStatus(true);
         break;
       case "OCUPADO":
-        alert("Datos de la reserva.")
+        alert("Datos de la reserva.");
         break;
       case "MANTENIMIENTO":
         break;
@@ -67,6 +67,7 @@ function RoomCardList() {
 
   return (
     <>
+      <BackTop />
       <Card title={<span>Habitaciones</span>} style={{ marginTop: "20px" }}>
         <Row gutter={[10, 10]}>
           {rooms.map((data) => (

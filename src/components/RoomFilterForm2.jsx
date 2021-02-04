@@ -1,6 +1,10 @@
-import { ClearOutlined } from "@ant-design/icons";
-import { Button, Card, Form, Select, Tooltip } from "antd";
 import React from "react";
+
+import { Button, Card, Form, Select, Tooltip } from "antd";
+import { ClearOutlined } from "@ant-design/icons";
+
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 const styleFormItem = {
   display: "flex",
@@ -9,6 +13,17 @@ const styleFormItem = {
 };
 
 function RoomFilterForm2() {
+  const validationSchema = Yup.object({}); // eslint-disable-next-line
+  const { handleSubmit, handleChange, values, setFieldValue, errors, touched } = useFormik({
+    initialValues: {
+      roomKind: {}
+    },
+    validationSchema,
+    onSubmit: (data) => {
+      console.log(data);
+    },
+  });
+
   return (
     <Card>
       <Form layout="inline">
