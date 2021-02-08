@@ -25,4 +25,22 @@ const findBooksByRangeDate = async (data) => {
   return resp.data;
 };
 
-export { getBooks, getBookById, createBook, findBooksByRangeDate, changeBookStatus };
+const findBookByCodeBook = async (code) => {
+  const resp = await clienteAxios.get(`/reservas/codigo/${code}`);
+  return resp.data;
+};
+
+const findBookByIdHabitacion = async (idHabitacion) => {
+  const resp = await clienteAxios.get(`/reservas/habitacion/${idHabitacion}`);
+  return resp.data;
+};
+
+export {
+  getBooks,
+  getBookById,
+  createBook,
+  findBooksByRangeDate,
+  changeBookStatus,
+  findBookByCodeBook,
+  findBookByIdHabitacion
+};

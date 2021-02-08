@@ -67,56 +67,65 @@ const CheckOut = () => {
   });
 
   const listRooms = () => {
-    getBooks().then((resp) => {
-      resp.forEach((data) => {
-        data.key = data.id;
-        data.nombreHuesped = data.huesped.nombre;
-        data.documentoHuesped = data.huesped.documento;
-        data.nombreHabitacion = data.habitacion.nombre;
-        data.rangoFecha =
-          moment(data.fechaInicio).format("dddd, D MMMM [del] YYYY") +
-          " - " +
-          moment(data.fechaFinal).format("dddd, D MMMM [del] YYYY");
-      });
-      const filterStatus = resp.filter((data) => data.estado === "ACTIVO");
-      setDataSource(filterStatus);
-      console.log(resp);
-      console.log("FILTER", filterStatus);
-      setLoading(false);
-    });
+    getBooks()
+      .then((resp) => {
+        resp.forEach((data) => {
+          data.key = data.id;
+          data.nombreHuesped = data.huesped.nombre;
+          data.documentoHuesped = data.huesped.documento;
+          data.nombreHabitacion = data.habitacion.nombre;
+          data.rangoFecha =
+            moment(data.fechaInicio).format("dddd, D MMMM [del] YYYY") +
+            " - " +
+            moment(data.fechaFinal).format("dddd, D MMMM [del] YYYY");
+        });
+        const filterStatus = resp.filter((data) => data.estado === "ACTIVO");
+        setDataSource(filterStatus);
+        console.log(resp);
+        console.log("FILTER", filterStatus);
+        setLoading(false);
+      })
+      .catch(() => {});
   };
 
   const closeDrawer = () => {
     setTotalConsumo(0);
     setTotalNeto(0);
+    setConsumo([]);
+    setBook({});
     setDrawerVisible(false);
   };
 
   const openDrawer = (id) => {
-    getBookById(id).then((resp) => {
-      resp.nombreHabitacion = resp.habitacion.nombre;
-      resp.nombreTipoHabitacion = resp.habitacion.tipoHabitacion.nombre;
-      resp.nombreHuesped = resp.huesped.nombre;
-      resp.documentoHuesped = resp.huesped.documento;
-      setBook(resp);
+    getBookById(id).then((resp1) => {
+      resp1.nombreHabitacion = resp1.habitacion.nombre;
+      resp1.nombreTipoHabitacion = resp1.habitacion.tipoHabitacion.nombre;
+      resp1.nombreHuesped = resp1.huesped.nombre;
+      resp1.documentoHuesped = resp1.huesped.documento;
+      setBook(resp1);
+
+      getConsumosByReservaId(id)
+        .then((resp) => {
+          let totalNeto = 0;
+          resp.forEach((data) => {
+            console.log(data);
+            data.nombreProducto = data.producto.nombre;
+            data.precioProducto = data.producto.precio;
+            totalNeto += data.total;
+          });
+          setConsumo(resp);
+          setTotalConsumo(totalNeto);
+          let debeReserva =
+            Number(resp1.precioTotal) - Number(resp1.pagoAdelantado);
+          setTotalNeto(debeReserva + Number(totalNeto));
+        })
+        .catch(() => {
+          let debeReserva =
+            Number(resp1.precioTotal) - Number(resp1.pagoAdelantado);
+          setTotalNeto(debeReserva);
+        });
     });
     setFieldValue("reserva.id", id);
-
-    getConsumosByReservaId(id).then((resp) => {
-      let totalNeto = 0;
-      resp.forEach((data) => {
-        console.log(data);
-        data.nombreProducto = data.producto.nombre;
-        data.precioProducto = data.producto.precio;
-        totalNeto += data.total;
-      });
-      setConsumo(resp);
-      setTotalConsumo(totalNeto);
-
-      let debeReserva = Number(book.precioTotal) - Number(book.pagoAdelantado);
-      setTotalNeto(debeReserva + Number(totalNeto));
-    });
-
     setDrawerVisible(true);
   };
 
