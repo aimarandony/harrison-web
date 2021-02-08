@@ -12,6 +12,7 @@ const generatePdfFactura = async (reservaId) => {
       const file = new Blob([resp.data], { type: "application/pdf" });
       const fileURL = URL.createObjectURL(file);
       window.open(fileURL);
+      console.log("PDF GENERADO");
     });
 };
 
