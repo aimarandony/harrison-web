@@ -17,6 +17,7 @@ import {
 } from "antd";
 import { getRooms } from "../services/RoomService";
 import {
+  changeBookStatus,
   findBookByCodeBook,
   findBookByIdHabitacion,
 } from "../services/BookService";
@@ -34,7 +35,7 @@ function RoomCardList() {
   const [rooms, setRooms] = useState([]);
   const [bookFormStatus, setBookFormStatus] = useState(false);
   const [registeredBook, setRegisteredBook] = useState(false);
-  const [changeStatusRoom, setChangeStatusRoom] = useState(false);
+  const [changeeStatusRoom, setChangeStatusRoom] = useState(false);
   const [modalOcupadoVisible, setModalOcupadoVisible] = useState(false);
   const [modalReservadoVisible, setModalReservadoVisible] = useState(false);
   const [book, setBook] = useState({});
@@ -45,15 +46,17 @@ function RoomCardList() {
 
   const reservadoFormik = useFormik({
     initialValues: {
+      idHabitacion: "",
       codigo: "",
     },
     validationSchema,
     onSubmit: (data) => {
-      findBookByCodeBook(data.codigo)
+      findBookByCodeBook(data.codigo, data.idHabitacion)
         .then((resp) => {
           message.success("Código de reserva " + data.codigo + " válido.");
-          setBook(resp);
+          setBook(parseDataBook(resp));
           console.log(resp);
+          changeBookStatus("ACTIVO", resp.id).then();
         })
         .catch(() => {
           message.error("Código de reserva inválido.");
@@ -79,7 +82,7 @@ function RoomCardList() {
         data.precio = data.tipoHabitacion.precio;
       });
       setRooms(resp);
-      console.log("LIST CARDLIST");
+      console.log("LIST CARDLIST", resp);
     });
   };
 
@@ -107,6 +110,7 @@ function RoomCardList() {
       case "MANTENIMIENTO":
         break;
       case "RESERVADO":
+        reservadoFormik.setFieldValue("idHabitacion", id);
         setModalReservadoVisible(true);
         break;
       default:
@@ -131,10 +135,10 @@ function RoomCardList() {
       setRegisteredBook(false);
       console.log("LIST CARDLIST IFFF");
     }
-    if (changeStatusRoom) {
+    if (changeeStatusRoom) {
       setChangeStatusRoom(false);
     }
-  }, [registeredBook, changeStatusRoom]);
+  }, [registeredBook, changeeStatusRoom, modalReservadoVisible]);
 
   return (
     <>

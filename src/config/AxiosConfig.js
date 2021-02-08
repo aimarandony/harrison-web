@@ -1,6 +1,6 @@
 import Axios from "axios";
 
-const URL = "https://hotel-harrison.herokuapp.com/";
+const URL = "https://hotel-harrison-v2.herokuapp.com/";
 
 const clienteAxios = Axios.create({
   baseURL: URL,

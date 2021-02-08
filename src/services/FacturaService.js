@@ -5,4 +5,14 @@ const createFactura = async (data) => {
   return resp.data;
 };
 
-export { createFactura };
+const generatePdfFactura = async (reservaId) => {
+  await clienteAxios
+    .get("/facturas/pdf/" + reservaId, { responseType: "blob" })
+    .then((resp) => {
+      const file = new Blob([resp.data], { type: "application/pdf" });
+      const fileURL = URL.createObjectURL(file);
+      window.open(fileURL);
+    });
+};
+
+export { createFactura, generatePdfFactura };

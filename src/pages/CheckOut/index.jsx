@@ -22,7 +22,10 @@ import moment from "moment";
 import "moment/locale/es";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { createFactura } from "../../services/FacturaService";
+import {
+  createFactura,
+  generatePdfFactura,
+} from "../../services/FacturaService";
 import { getConsumosByReservaId } from "../../services/ConsumoService";
 
 const CheckOut = () => {
@@ -55,10 +58,12 @@ const CheckOut = () => {
     validationSchema,
     onSubmit: (data) => {
       console.log(data);
+      generatePdfFactura(data.reserva.id);
       createFactura(data).then((resp) => {
         console.log("RESP", resp);
         changeBookStatus("FINALIZADO", values.reserva.id).then(console.log);
         message.success("Hospedaje finalizado.");
+        generatePdfFactura(data.reserva.id);
       });
       listRooms();
       resetForm();
