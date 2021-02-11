@@ -6,6 +6,7 @@ import CheckOut from "../pages/CheckOut";
 import Client from "../pages/Client";
 import Product from "../pages/Product";
 import Reception2 from "../pages/Reception2";
+import Reporte from "../pages/Reporte";
 import Room from "../pages/Room";
 import Sale from "../pages/Sale";
 
@@ -20,6 +21,7 @@ export const DashboardRoutes = () => {
         <Route exact path="/venta" component={Sale} />
         <Route exact path="/mantenimiento/habitacion" component={Room} />
         <Route exact path="/clientes" component={Client} />
+        <Route exact path="/reporte" component={Reporte} />
         <Redirect to="/reserva" />
       </Switch>
     </Layout>

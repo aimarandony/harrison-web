@@ -4,7 +4,6 @@ import { PageHeader } from "antd";
 
 import "./Reception2.css";
 import RoomCardList from "../../components/RoomCardList";
-import RoomFilterForm2 from "../../components/RoomFilterForm2";
 
 function Reception2() {
   return (
@@ -14,7 +13,6 @@ function Reception2() {
         title="Recepción"
         subTitle="Recepción de habitaciones."
       />
-      <RoomFilterForm2 />
       <RoomCardList />
     </div>
   );

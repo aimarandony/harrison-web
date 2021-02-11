@@ -1,4 +1,3 @@
-import { EyeOutlined } from "@ant-design/icons";
 import {
   Alert,
   Button,
@@ -40,6 +39,28 @@ const CheckOut = () => {
   const [totalConsumo, setTotalConsumo] = useState(0);
   const [totalNeto, setTotalNeto] = useState(0);
 
+  const listRooms = () => {
+    getBooks()
+      .then((resp) => {
+        resp.forEach((data) => {
+          data.key = data.id;
+          data.nombreHuesped = data.huesped.nombre;
+          data.documentoHuesped = data.huesped.documento;
+          data.nombreHabitacion = data.habitacion.nombre;
+          data.rangoFecha =
+            moment(data.fechaInicio).format("dddd, D MMMM [del] YYYY") +
+            " - " +
+            moment(data.fechaFinal).format("dddd, D MMMM [del] YYYY");
+        });
+        const filterStatus = resp.filter((data) => data.estado === "ACTIVO");
+        setDataSource(filterStatus);
+        console.log(resp);
+        console.log("FILTER", filterStatus);
+        setLoading(false);
+      })
+      .catch(() => {});
+  };
+
   const validationSchema = Yup.object({});
 
   const { handleSubmit, setFieldValue, values, resetForm } = useFormik({
@@ -64,34 +85,12 @@ const CheckOut = () => {
         changeBookStatus("FINALIZADO", values.reserva.id).then(console.log);
         message.success("Hospedaje finalizado.");
         generatePdfFactura(data.reserva.id);
+        listRooms();
       });
-      listRooms();
       resetForm();
       setDrawerVisible(false);
     },
   });
-
-  const listRooms = () => {
-    getBooks()
-      .then((resp) => {
-        resp.forEach((data) => {
-          data.key = data.id;
-          data.nombreHuesped = data.huesped.nombre;
-          data.documentoHuesped = data.huesped.documento;
-          data.nombreHabitacion = data.habitacion.nombre;
-          data.rangoFecha =
-            moment(data.fechaInicio).format("dddd, D MMMM [del] YYYY") +
-            " - " +
-            moment(data.fechaFinal).format("dddd, D MMMM [del] YYYY");
-        });
-        const filterStatus = resp.filter((data) => data.estado === "ACTIVO");
-        setDataSource(filterStatus);
-        console.log(resp);
-        console.log("FILTER", filterStatus);
-        setLoading(false);
-      })
-      .catch(() => {});
-  };
 
   const closeDrawer = () => {
     setTotalConsumo(0);
@@ -226,9 +225,6 @@ const CheckOut = () => {
       align: "center",
       render: (values, record) => (
         <>
-          <Button type="link" size="small">
-            <EyeOutlined />
-          </Button>
           <Button
             type="primary"
             size="small"

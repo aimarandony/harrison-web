@@ -104,12 +104,17 @@ const LayoutCustom = ({ children }) => {
               Clientes
             </NavLink>
           </Menu.Item>
-          <SubMenu key="sub4" icon={<FileOutlined />} title="Reporte">
+          <Menu.Item key="9" icon={<FileOutlined />}>
+            <NavLink to="/reporte" activeClassName="active">
+            Informes
+            </NavLink>
+          </Menu.Item>
+          {/* <SubMenu key="sub4" icon={<FileOutlined />} title="Reporte">
             <Menu.Item key="10">Diario</Menu.Item>
             <Menu.Item key="11">Mensual</Menu.Item>
             <Menu.Item key="12">Caja</Menu.Item>
             <Menu.Item key="13">Recepcionista</Menu.Item>
-          </SubMenu>
+          </SubMenu> */}
           <SubMenu key="sub5" icon={<KeyOutlined />} title="Administración">
             <Menu.Item key="14">Usuarios</Menu.Item>
           </SubMenu>

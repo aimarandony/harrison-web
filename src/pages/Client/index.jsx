@@ -1,4 +1,4 @@
-import { EditOutlined, EyeOutlined } from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import {
   Form,
   Button,
@@ -240,9 +240,6 @@ const Client = () => {
       align: "center",
       render: (val, record) => (
         <>
-          <Button type="link" size="small">
-            <EyeOutlined />
-          </Button>
           <Button type="link" size="small" onClick={() => edit(record.id)}>
             <EditOutlined />
           </Button>

@@ -5,6 +5,11 @@ const createFactura = async (data) => {
   return resp.data;
 };
 
+const findDateFactura = async (data) => {
+  const resp = await clienteAxios.post("/facturas/find-date", data);
+  return resp.data;
+};
+
 const generatePdfFactura = async (reservaId) => {
   await clienteAxios
     .get("/facturas/pdf/" + reservaId, { responseType: "blob" })
@@ -16,4 +21,4 @@ const generatePdfFactura = async (reservaId) => {
     });
 };
 
-export { createFactura, generatePdfFactura };
+export { createFactura, generatePdfFactura, findDateFactura };
